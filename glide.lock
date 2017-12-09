@@ -1,0 +1,9 @@
+hash: 91f1fc9bcab79f9699c7625f21715d7af1c408ac5af9387d831bf07f16928f5b
+updated: 2017-11-18T14:46:17.954362+08:00
+imports:
+- name: golang.org/x/crypto
+  version: adbae1b6b6fb4b02448a0fc0dbbc9ba2b95b294d
+  subpackages:
+  - pbkdf2
+  - scrypt
+testImports: []

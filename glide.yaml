@@ -1,0 +1,5 @@
+package: github.com/waysaku/bloomfilter
+import:
+- package: golang.org/x/crypto
+  subpackages:
+  - scrypt
