@@ -5,35 +5,75 @@ import (
 	"crypto/sha256"
 	"encoding/binary"
 	"bytes"
+	"math"
+	"strconv"
 )
 
+var m uint32 = 4096
+var n = 256
+var k = int((float64(m) / float64(n)) * math.Log(2))
+var checkCount = 1000000
 
 func main() {
+	fmt.Println("m = " + strconv.Itoa(int(m)))
+	fmt.Println("n = " + strconv.Itoa(n))
+	fmt.Println("k = " + strconv.Itoa(k))
 
-	// 32bit
-	var filter [4294967295]bool
-	addText 	:= "apple"
+	a := 1 - (float32(1) / float32(m))
+	b := k * n
+	c := 1 - math.Pow(float64(a), float64(b))
+	d := math.Pow(c, float64(k))
+	fmt.Println("culculate Rate = " + strconv.FormatFloat(d, 'f', 6, 64))
+	fmt.Println("constant Rate  = " + strconv.FormatFloat(math.Pow(0.6185, float64(m) / float64(n)), 'f', 6, 64))
+	fmt.Println("ideal Rate     = " + strconv.FormatFloat(math.Pow(0.5, float64(k)),'f', 6, 64))
 
-	for _, hashFunc := range initializeHashFuncs() {
-		hash := hashFunc(addText)
 
-		var i uint32
-		buf := bytes.NewReader(hash[:])
-		err := binary.Read(buf, binary.LittleEndian, &i)
-		if err != nil {
-			fmt.Println("binary.Read failded:", err)
+	var filter 			= make([]bool, m)
+	var addingStrings   = generateText(n, "adding_word")
+	var checkingStrings = generateText(checkCount, "checking_word")
+	var hashFuncs       = initializeHashFuncs(k)
+
+	for _, str := range addingStrings {
+		for _, hashFunc := range hashFuncs {
+			hash := hashFunc(str)
+
+			var i uint32
+			buf := bytes.NewReader(hash[:])
+			err := binary.Read(buf, binary.LittleEndian, &i)
+			if err != nil {
+				fmt.Println("binary.Read failded:", err)
+			}
+
+			filter[i % m] = true
 		}
-
-		filter[i] = true
 	}
 
-	fmt.Println(isExist(filter[:], "apple"))
+	fmt.Println("----- add text done! -----")
 
+	var countFalsePositive int
+	for _, str := range checkingStrings {
+		rslt := isExist(hashFuncs, filter[:], str)
+		if rslt {
+			countFalsePositive++
+		}
+	}
+
+	fmt.Println("count of FalsePositives is " + strconv.Itoa(countFalsePositive))
+	fmt.Println("False Positive Rate = " + strconv.FormatFloat(float64(countFalsePositive) / float64(checkCount), 'f', 4, 64))
+	fmt.Println("----- end! -----")
 }
 
-func isExist(filter []bool, text string) bool {
-	var exist bool
-	for _, hashFunc := range initializeHashFuncs() {
+
+func generateText(num int, word string) []string {
+	var addingStrings = make([]string, num)
+	for i := 0; i < num; i++ {
+		addingStrings[i] = word + strconv.Itoa(i)
+	}
+	return addingStrings
+}
+
+func isExist(hashFuncs []func(word string) [sha256.Size]byte, filter []bool, text string) bool {
+	for _, hashFunc := range hashFuncs {
 		hash := hashFunc(text)
 
 		var i uint32
@@ -42,30 +82,27 @@ func isExist(filter []bool, text string) bool {
 		if err != nil {
 			fmt.Println("binary.Read failded:", err)
 		}
-		if filter[i] {
-			exist = true
+		if !filter[i % m] {
+			return false
 		}
 	}
-	return exist
+	return true
 }
 
 
 
-func initializeHashFuncs() []func(word string) [sha256.Size]byte {
-	return []func(word string) [sha256.Size]byte {
-								makeHashFunc("hoge0"),
-								makeHashFunc("hoge1"),
-								makeHashFunc("hoge2"),
-								makeHashFunc("hoge3"),
-								makeHashFunc("hoge4"),
-								makeHashFunc("hoge5"),
-								makeHashFunc("hoge6"),
-								makeHashFunc("hoge7"),
-								makeHashFunc("hoge8"),
-								}
+func initializeHashFuncs(k int) []func(word string) [sha256.Size]byte {
+	var hashFuncs = make([]func(word string) [sha256.Size]byte, k)
+	for i := 0; i < k; i++ {
+		hashFuncs[i] = makeHashFunc("function_seed_" + strconv.Itoa(i))
+	}
+	return hashFuncs[:]
 }
+
 func makeHashFunc(salt string) func(word string) [sha256.Size]byte {
 	return func(word string) [sha256.Size]byte {
-		return sha256.Sum256([]byte(word + salt))
+		//return sha256.Sum256([]byte(word + salt))
+		h := sha256.Sum256([]byte(word + salt))
+		return sha256.Sum256(h[:])
 	}
 }

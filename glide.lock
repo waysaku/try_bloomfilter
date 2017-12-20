@@ -1,9 +1,10 @@
-hash: 91f1fc9bcab79f9699c7625f21715d7af1c408ac5af9387d831bf07f16928f5b
-updated: 2017-11-18T14:46:17.954362+08:00
+hash: dc3a7bf41e5c7ef44fc4d25d590e0dbad871b8a42c54631bf91bd0717fa7e9a2
+updated: 2017-12-16T17:21:42.009096+08:00
 imports:
+- name: github.com/spaolacci/murmur3
+  version: 9f5d223c60793748f04a9d5b4b4eacddfc1f755d
 - name: golang.org/x/crypto
   version: adbae1b6b6fb4b02448a0fc0dbbc9ba2b95b294d
   subpackages:
-  - pbkdf2
   - scrypt
 testImports: []
