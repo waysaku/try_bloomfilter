@@ -19,13 +19,10 @@ func main() {
 	fmt.Println("n = " + strconv.Itoa(n))
 	fmt.Println("k = " + strconv.Itoa(k))
 
-	a := 1 - (float32(1) / float32(m))
-	b := k * n
-	c := 1 - math.Pow(float64(a), float64(b))
-	d := math.Pow(c, float64(k))
-	fmt.Println("culculate Rate = " + strconv.FormatFloat(d, 'f', 6, 64))
-	fmt.Println("constant Rate  = " + strconv.FormatFloat(math.Pow(0.6185, float64(m) / float64(n)), 'f', 6, 64))
-	fmt.Println("ideal Rate     = " + strconv.FormatFloat(math.Pow(0.5, float64(k)),'f', 6, 64))
+	fmt.Println("ideal Rate       = " + strconv.FormatFloat(math.Pow(0.5, float64(k)),'f', 6, 64))
+	fmt.Println("Rate by formula  = " + strconv.FormatFloat(math.Pow(0.6185, float64(m) / float64(n)), 'f', 6, 64))
+	rate := math.Pow(1 - math.Pow(float64(1 - (float32(1) / float32(m))), float64(k * n)), float64(k))
+	fmt.Println("culculated Rate  = " + strconv.FormatFloat(rate, 'f', 6, 64))
 
 
 	var filter 			= make([]bool, m)
