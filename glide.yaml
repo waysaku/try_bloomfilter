@@ -1,7 +1,0 @@
-package: github.com/waysaku/bloomfilter
-import:
-- package: golang.org/x/crypto
-  subpackages:
-  - scrypt
-- package: github.com/spaolacci/murmur3
-  version: ^1.1.0
